@@ -1,6 +1,6 @@
 (defproject digress "0.1.0-SNAPSHOT"
   :description "A chat app that allows multiple conversations with the same contact."
-  :min-lein-version "2.6.1"
+  :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.36"]
                  [org.omcljs/om "1.0.0-alpha34"]
