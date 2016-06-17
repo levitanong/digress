@@ -38,5 +38,7 @@
     (reset! server nil)))
 
 (defn -main [& args]
-  (reset! server (run-server (site #'app-routes) {:port (or (System/getenv "PORT")
-                                                            8080)})))
+  (println (System/getenv "PORT"))
+  (reset! server (run-server (site #'app-routes)
+                             {:port (or (System/getenv "PORT")
+                                        8080)})))
