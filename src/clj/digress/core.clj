@@ -38,4 +38,4 @@
     (reset! server nil)))
 
 (defn -main [& args]
-  (reset! server (run-server (site #'app-routes) {:port 8080})))
+  (reset! server (run-server (site #'app-routes) {:port 80})))
