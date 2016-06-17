@@ -1,1 +1,1 @@
-web: lein trampoline run -m digress.core $PORT
+web: lein trampoline run -m digress.core
