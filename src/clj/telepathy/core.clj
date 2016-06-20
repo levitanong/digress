@@ -1,6 +1,7 @@
 (ns telepathy.core
   (:require [com.stuartsierra.component :as component]
             [org.httpkit.server :refer [run-server]]
+            #_[system.components.http-kit :refer [new-web-server]]
             [compojure.core :refer [routes GET POST ANY DELETE context defroutes]]
             [compojure.route :refer [not-found] :as route]
             [compojure.handler :refer [site]]
@@ -17,16 +18,12 @@
 
 (defn async-handler [{:keys [ws-channel] :as req}]
   (go
-    (let [{:keys [message]} (<! ws-channel)]
-      (println "Message: " message)
-      (>! ws-channel "Hello from server!")
-      (close! ws-channel)))
-  #_(with-channel req ws-ch
-      (go
-        (let [{:keys [message]} (<! ws-ch)]
-          (prn "Message received " message)
-          (>! ws-channel "Hello from server!")
-          (close! ws-channel)))))
+    (loop []
+      (let [{:keys [message]} (<! ws-channel)]
+        (when message
+          (println "Received message from client: " message)
+          (recur))
+        #_(close! ws-channel)))))
 
 (def app-routes
   (site
