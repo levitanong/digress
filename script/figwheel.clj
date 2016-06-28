@@ -6,6 +6,8 @@
  '[telepathy.core :as telepathy]
  #_'[ring.component.jetty :refer [jetty-server]])
 
+;; rlwrap lein run -m clojure.main --init script/figwheel.clj  -r
+
 (def figwheel-config
   {:figwheel-options {} ;; <-- figwheel server config goes here 
    :build-ids ["dev"]   ;; <-- a vector of build ids to start autobuilding
@@ -38,7 +40,7 @@
 (def system
   (atom
    (component/system-map
-    :app-server (new-web-server 3000 telepathy/app-routes #_handler)
+    :app-server (new-web-server 3000 telepathy/app-routes)
     :figwheel   (map->Figwheel figwheel-config))))
 
 (defn start []
@@ -47,7 +49,7 @@
 (defn stop []
   (swap! system component/stop))
 
-(defn reload []
+(defn restart []
   (stop)
   (start))
 

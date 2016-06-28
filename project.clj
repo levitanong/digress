@@ -7,7 +7,7 @@
                  [com.stuartsierra/component "0.3.1"]
                  [http-kit "2.2.0-alpha2"]
                  [compojure "1.5.0"]
-                 [jarohen/chord "0.7.0"]
+                 [jarohen/chord "0.7.0-SNAPSHOT"]
                  [javax.servlet/servlet-api "2.5"]
                  [org.danielsz/system "0.3.0-SNAPSHOT"]
                  [figwheel-sidecar "0.5.0-SNAPSHOT" :scope "test"]]
