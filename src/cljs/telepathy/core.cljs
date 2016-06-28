@@ -9,20 +9,6 @@
 (def ws-url "ws://localhost:3000/async")
 (enable-console-print!)
 
-#_(go 
-    (let [{:keys [ws-channel error]} (<! (ws-ch "ws://localhost:3000/async"))]
-      (go-loop []
-        (println "eh")
-        (let [{:keys [message]} (<! ws-channel)]
-          (cond
-            error (println "error: " error)
-            message (println "message: " message)
-            :else (println "nothing"))
-          (recur)))
-      #_(>! ws-channel "tangina")
-      #_(println "sending spam to server")
-      #_(>! ws-channel "spam from client")))
-
 (defn- send-msgs! [new-msg-ch server-ch]
   (go-loop []
     (when-let [msg (<! new-msg-ch)]
@@ -34,16 +20,7 @@
     (let [{:keys [message]} (<! server-ch)]
       (when message
         (println message)
-        (recur))))
-  #_(go-loop []
-      (let [{:keys [message error] :as msg-container} (<! server-ch)]
-        (println msg-container)
-        #_(cond
-            error (println "error: " error)
-            message (swap! msgs conj message)
-            :else (println "eh?"))
-        (when message
-          (recur)))))
+        (recur)))))
 
 (defui WSTest
   Object
