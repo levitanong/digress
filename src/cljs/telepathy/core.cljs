@@ -3,42 +3,59 @@
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [chord.client :refer [ws-ch]]
-            [cljs.core.async :refer [<! >! put! close! chan]])
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
+            [cljs.core.async :refer [<! >! put! close! chan timeout] :as a]
+            [clojure.string :as string])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
+  (:import [goog Uri]
+           [goog.net Jsonp]))
 
-(def ws-url "ws://localhost:3000/async")
 (enable-console-print!)
+(def ws-url "ws://localhost:3000/ws")
 
-(defn- send-msgs! [new-msg-ch server-ch]
+(defn- receive-msgs! [ws-channel]
   (go-loop []
-    (when-let [msg (<! new-msg-ch)]
-      (>! server-ch msg)
-      (recur))))
-
-(defn- receive-msgs! [server-ch]
-  (go-loop []
-    (let [{:keys [message]} (<! server-ch)]
+    (let [{:keys [message error]} (<! ws-channel)]
+      (when error
+        (println error))
       (when message
         (println message)
+        #_(<! (timeout 100))
         (recur)))))
 
-(defui WSTest
+(defn- send-msgs! [new-msg-ch ws-channel]
+  (go
+    (loop []
+      (when-let [msg (<! new-msg-ch)]
+        (println "sending message: " msg)
+        (>! ws-channel msg)
+        (recur)))))
+
+(defmulti read om/dispatch)
+
+(defmethod read :default
+  [{:keys [state ast] :as env} key params]
+  (println ast)
+  (let [st @state]
+    (if-let [value (get st key)]
+      {:value value}
+      {:value :not-found})))
+
+(defui Home
   Object
   (render [this]
-    (dom/div nil
-      "YO"
-      (dom/button
-          #js {:onClick (fn []
-                          (let [send-msg-ch (get (om/props this) :send-msg-ch)]
-                            (put! send-msg-ch "Testing, 1 2 3")))}
-        "Send server a message"))))
-
-(def wstest (om/factory WSTest))
+    (let [{:keys [send-msg-ch msg/list]} (om/props this)]
+      (dom/div nil
+        "hi"
+        (dom/button #js {:onClick (fn [] (put! send-msg-ch "Testing, 123"))}
+          "Send server a message")))))
 
 (go
   (let [{:keys [ws-channel]} (<! (ws-ch ws-url))]
     (receive-msgs! ws-channel)
-    (js/ReactDOM.render
-     (wstest {:send-msg-ch (doto (chan)
-                             (send-msgs! ws-channel))})
-     (gdom/getElement "app"))))
+    (om/add-root! (om/reconciler
+                   {:state (atom {:msg/list []
+                                  :send-msg-ch (doto (chan)
+                                                 (send-msgs! ws-channel))})
+                    :parser (om/parser {:read read})})
+                  Home
+                  (gdom/getElement "app"))))
